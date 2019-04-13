@@ -8,52 +8,64 @@ class GildedRose {
     }
 
     public void updateQuality() {
-        for (int i = 0; i < items.length; i++) {
-            if (!items[i].name.equals("Aged Brie")
-                    && !items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                if (items[i].quality > 0) {
-                    if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                        items[i].quality = items[i].quality - 1;
+        // looping through all the items so quality does not increase while ageing
+        for (Item item: items) {
+            // item not Aged Brie
+            if (!item.name.equals("Aged Brie")
+                    // item not Backstage passes so quality does not increase while ageing
+                    // quality 0 after the concert
+                    // Brie increase quality by 1 every day
+                    && !item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
+                if (item.quality > 0) {
+                    // if item is not sulfuras ( so it can be sold )
+                    if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
+                        // quality decreases day by day
+                        item.quality = item.quality - 1;
                     }
                 }
+                // item is brie and backstage passes ( quality increases every day in both cases )
             } else {
-                if (items[i].quality < 50) {
-                    items[i].quality = items[i].quality + 1;
-
-                    if (items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].sellIn < 11) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
+                // quality cannot be more than 50
+                if (item.quality < 50) {
+                    item.quality = item.quality + 1;
+                    // item is Backstage passes (quality increases every day)
+                    if (item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
+                        // inc
+                        if (item.sellIn < 11) {
+                            if (item.quality < 50) {
+                                // it should be +2
+                                item.quality = item.quality + 1;
                             }
                         }
 
-                        if (items[i].sellIn < 6) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
+                        if (item.sellIn < 6) {
+                            if (item.quality < 50) {
+                                // it should be +3
+                                item.quality = item.quality + 1;
                             }
                         }
                     }
                 }
             }
 
-            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                items[i].sellIn = items[i].sellIn - 1;
+            if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
+                item.sellIn = item.sellIn - 1;
             }
 
-            if (items[i].sellIn < 0) {
-                if (!items[i].name.equals("Aged Brie")) {
-                    if (!items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].quality > 0) {
-                            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                                items[i].quality = items[i].quality - 1;
+            if (item.sellIn < 0) {
+                if (!item.name.equals("Aged Brie")) {
+                    if (!item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
+                        if (item.quality > 0) {
+                            if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
+                                item.quality = item.quality - 1;
                             }
                         }
                     } else {
-                        items[i].quality = items[i].quality - items[i].quality;
+                        item.quality = item.quality - item.quality;
                     }
                 } else {
-                    if (items[i].quality < 50) {
-                        items[i].quality = items[i].quality + 1;
+                    if (item.quality < 50) {
+                        item.quality = item.quality + 1;
                     }
                 }
             }
