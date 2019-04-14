@@ -2,134 +2,163 @@ package com.gildedrose;
 
 import static org.junit.Assert.*;
 
+import com.gildedrose.item.Item;
+import com.gildedrose.item.CustomisedItemFactory;
 import org.junit.Test;
 
 public class GildedRoseTest {
 
     @Test
     public void foo() {
-        Item[] items = new Item[] { new Item("foo", 0, 0) };
-        GildedRose app = new GildedRose(items);
+        GildedRose app = newGildedRose("foo", 0, 0);
         app.updateQuality();
         assertEquals("foo", app.items[0].name);
     }
 
     @Test
-    public void updateQuality_decrementsItemQualityAndSellInBy1() {
-        Item[] items = new Item[] { new Item("foo", 1, 1) };
-        GildedRose app = new GildedRose(items);
+    public void standardItemDecreasesSellByDayNumberEachTime() {
+        GildedRose app = newGildedRose("standard item", 0, 0);
         app.updateQuality();
-        assertEquals("foo", app.items[0].name);
-        assertEquals(0, app.items[0].quality);
-        assertEquals(0, app.items[0].sellIn);
+        assertEquals(-1, itemSellByDayNumber(app));
     }
 
     @Test
-    public void onceTheSellByDateHasPassed_QualityDegradesTwiceAsFast()  {
-        Item[] items = new Item[] { new Item("bar", -1, 2) };
-        GildedRose app = new GildedRose(items);
+    public void brieDecreasesSellByDayNumberEachTime() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BRIE, 0, 0);
         app.updateQuality();
-        assertEquals("bar", app.items[0].name);
-        assertEquals(0, app.items[0].quality);
-        assertEquals(-2, app.items[0].sellIn);
+        assertEquals(-1, itemSellByDayNumber(app));
     }
 
     @Test
-    public void qualityOfAnItemIsNeverNegative()  {
-        Item[] items = new Item[] { new Item("foo", 2, 2) };
-        GildedRose app = new GildedRose(items);
-        app.updateQuality(); // first system run
-        app.updateQuality(); // second system run
-        app.updateQuality(); // third system run
-        assertEquals("foo",app.items[0].name);
-        assertEquals(0, app.items[0].quality);
-        assertEquals(-1, app.items[0].sellIn);
-    }
-
-    // Aged Brie and Backstage both quality increases with less selling days
-    @Test
-    public void qualityOfAnItemIsNeverMoreThan50() {
-        Item[] items = new Item[] { new Item("Aged Brie", -1, 50),
-                new Item("Backstage passes to a TAFKAL80ETC concert", 3, 49)};
-        GildedRose app = new GildedRose(items);
+    public void backstagePassesItemDecreasesSellByDayNumberEachTime() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 0, 0);
         app.updateQuality();
-        assertEquals("Aged Brie", app.items[0].name);
-        assertEquals(50, app.items[0].quality);
-        assertEquals(-2, app.items[0].sellIn);
-
-        assertEquals("Backstage passes to a TAFKAL80ETC concert", app.items[1].name);
-        assertEquals(50, app.items[1].quality);
-        assertEquals(2, app.items[1].sellIn);
-    }
-
-    // Sulpharas is never sold and in the end its quality is 80
-    @Test
-    public void SulfurasBeingLegendaryItemNeverSoldOrDecreaseInQuality() {
-        Item[] items = new Item[] { new Item("Sulfuras, Hand of Ragnaros", -1, 80) };
-        GildedRose app = new GildedRose(items);
-        app.updateQuality();
-        assertEquals("Sulfuras, Hand of Ragnaros", app.items[0].name);
-        assertEquals(80, app.items[0].quality);
-        assertEquals(-1, app.items[0].sellIn);
+        assertEquals(-1, itemSellByDayNumber(app));
     }
 
     @Test
-    public void backstagePassesQualityIncrementsByOneWithEachDayPassing() {
-        Item[] items = new Item[] { new Item("Backstage passes to a TAFKAL80ETC concert", 11, 30) };
-        GildedRose app = new GildedRose(items);
+    public void conjuredItemDecreasesSellByDayNumberEachTime() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.CONJURED_ITEM, 0, 0);
         app.updateQuality();
-        assertEquals("Backstage passes to a TAFKAL80ETC concert", app.items[0].name);
-        assertEquals(31, app.items[0].quality);
-        assertEquals(10, app.items[0].sellIn);
+        assertEquals(-1, itemSellByDayNumber(app));
     }
 
     @Test
-    public void AgedBrieQualityIncrementsByOneWithEachDayPassing() {
-        Item[] items = new Item[] { new Item("Aged Brie", 2, 0) };
-        GildedRose app = new GildedRose(items);
+    public void brieIncreasesInQualityEachTime() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BRIE, 1, 1);
         app.updateQuality();
-        assertEquals("Aged Brie", app.items[0].name);
-        assertEquals(1, app.items[0].quality);
-        assertEquals(1, app.items[0].sellIn);
+        assertEquals(2, itemQualityValue(app));
     }
 
     @Test
-    public void backstagePassesIncreaseInQualityBy2WhenThereAre10DaysOrLessRemaining() {
-        Item[] items = new Item[] { new Item("Backstage passes to a TAFKAL80ETC concert", 10, 30) };
-        GildedRose app = new GildedRose(items);
+    public void brieQualityCannotGoAboveFiftyWhenIncreasing() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BRIE, 1, 49);
         app.updateQuality();
-        assertEquals("Backstage passes to a TAFKAL80ETC concert", app.items[0].name);
-        assertEquals(32, app.items[0].quality);
-        assertEquals(9, app.items[0].sellIn);
+        app.updateQuality();
+        assertEquals(50, itemQualityValue(app));
     }
 
     @Test
-    public void backstagePassesIncreaseInQualityBy3WhenThereAre5DaysOrLessRemaining() {
-        Item[] items = new Item[] { new Item("Backstage passes to a TAFKAL80ETC concert", 5, 33) };
-        GildedRose app = new GildedRose(items);
+    public void backstagePassesItemDecreasesQualityByOneIfSellByDayMoreThanEleven() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 12, 1);
         app.updateQuality();
-        assertEquals("Backstage passes to a TAFKAL80ETC concert", app.items[0].name);
-        assertEquals(36, app.items[0].quality);
-        assertEquals(4, app.items[0].sellIn);
+        assertEquals(2, itemQualityValue(app));
     }
 
     @Test
-    public void backstagePassesQualityDropsTo0AfterTheConcert() {
-        Item[] items = new Item[] { new Item("Backstage passes to a TAFKAL80ETC concert", -1, 30) };
-        GildedRose app = new GildedRose(items);
+    public void backstagePassesItemDecreasesQualityByTwoIfSellByDayIsMoreThanSix() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 10, 1);
         app.updateQuality();
-        assertEquals("Backstage passes to a TAFKAL80ETC concert", app.items[0].name);
-        assertEquals(0, app.items[0].quality);
-        assertEquals(-2, app.items[0].sellIn);
+        assertEquals(3, itemQualityValue(app));
     }
 
     @Test
-    public void conjuredItemsDegradeInQualityTwiceAsFastAsNormalItems() {
-        Item[] items = new Item[] { new Item("Conjured", 2, 30) };
-        GildedRose app = new GildedRose(items);
+    public void backstagePassesItemDecreasesQualityByThreeIfSellByDayIsMoreThanZero() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 5, 1);
         app.updateQuality();
-        assertEquals("Conjured", app.items[0].name);
-        assertEquals(28, app.items[0].quality);
-        assertEquals(1, app.items[0].sellIn);
+        assertEquals(4, itemQualityValue(app));
+    }
+
+    @Test
+    public void backstagePassesItemQualityDropsToZeroIfSellByDayIsZeroOrLess() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 0,50);
+        app.updateQuality();
+        assertEquals(0, itemQualityValue(app));
+    }
+
+    @Test
+    public void backstagePassesItemQualityCannotGoAboveFiftyWhenIncreasing() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.BACKSTAGE_PASSES_ITEM, 5, 50);
+        app.updateQuality();
+        assertEquals(50, itemQualityValue(app));
+    }
+
+    @Test
+    public void standardItemDecreasesQualityByOneIfSellByDayIsAboveZero() {
+        GildedRose app = newGildedRose("foo", 2, 1);
+        app.updateQuality();
+        assertEquals(0, itemQualityValue(app));
+    }
+
+    @Test
+    public void standardItemDecreasesQualityByTwoOnceSellByDayIsZeroOrLess() {
+        GildedRose app = newGildedRose("foo",0, 5);
+        app.updateQuality();
+        assertEquals(3, itemQualityValue(app));
+    }
+
+    @Test
+    public void standardItemCannotHaveQualityBelowZero() {
+        GildedRose app = newGildedRose("foo", 0, 0);
+        app.updateQuality();
+        assertEquals(0, itemQualityValue(app));
+    }
+
+    @Test
+    public void sulfurasHasQualityEighty() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.SULFURAS, 1, 80);
+        assertEquals(80, itemQualityValue(app));
+    }
+
+    @Test
+    public void sulfurasItemDoesNotAlterValues() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.SULFURAS, 1, 80);
+        app.updateQuality();
+        assertEquals(80, itemQualityValue(app));
+        assertEquals(1, itemSellByDayNumber(app));
+    }
+
+    @Test
+    public void conjuredItemDecreasesQualityByTwoIfSellByDayIsAboveZero() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.CONJURED_ITEM, 2, 5);
+        app.updateQuality();
+        assertEquals(3, itemQualityValue(app));
+    }
+
+    @Test
+    public void conjuredItemDecreasesQualityByFourOnceSellByDayIsZeroOrLess() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.CONJURED_ITEM,0, 5);
+        app.updateQuality();
+        assertEquals(1, itemQualityValue(app));
+    }
+
+    @Test
+    public void conjuredItemCannotHaveQualityBelowZero() {
+        GildedRose app = newGildedRose(CustomisedItemFactory.CONJURED_ITEM, 0, 0);
+        app.updateQuality();
+        assertEquals(0, itemQualityValue(app));
+    }
+
+    private GildedRose newGildedRose(String itemName, int itemSellIn, int itemQuality) {
+        Item[] items = new Item[] { new Item(itemName, itemSellIn, itemQuality)};
+        return new GildedRose(items);
+    }
+
+    private int itemSellByDayNumber(GildedRose app) {
+        return app.items[0].sellIn;
+    }
+
+    private int itemQualityValue(GildedRose app) {
+        return app.items[0].quality;
     }
 }
